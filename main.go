@@ -6,8 +6,6 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
 )
 
 func GenerateJWT(privateKeyPath string, claims map[string]interface{}) (tokenStr string, err error) {
@@ -32,17 +30,4 @@ func GenerateJWT(privateKeyPath string, claims map[string]interface{}) (tokenStr
 
 func DecodeJWT(token *jwt.Token) (claims jwt.MapClaims) {
 	return token.Claims.(jwt.MapClaims)
-}
-
-func JWTEchoRSA(publicKeyPath string) echo.MiddlewareFunc {
-	verifyKeyStr, err := ioutil.ReadFile(publicKeyPath)
-	if err != nil {
-		log.Fatalf("%s", err.Error())
-	}
-	verifyKey, _ := jwt.ParseRSAPublicKeyFromPEM(verifyKeyStr)
-	return middleware.JWTWithConfig(middleware.JWTConfig{
-		SigningKey:    verifyKey,
-		SigningMethod: "RS256",
-		AuthScheme:    "Bearer",
-	})
 }
