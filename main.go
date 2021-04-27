@@ -8,8 +8,14 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-func GenerateJWT(privateKeyPath string, claims map[string]interface{}) (tokenStr string, err error) {
-	signKeyStr, err := ioutil.ReadFile(privateKeyPath)
+type GenerateJWTInput struct {
+	PrivateKeyPath string
+	Claims         map[string]interface{}
+	MinuteToExpire int
+}
+
+func GenerateJWT(input GenerateJWTInput) (tokenStr string, err error) {
+	signKeyStr, err := ioutil.ReadFile(input.PrivateKeyPath)
 	if err != nil {
 		log.Fatalf("%s", err.Error())
 	}
@@ -19,10 +25,10 @@ func GenerateJWT(privateKeyPath string, claims map[string]interface{}) (tokenStr
 
 	// Set claims
 	tclaims := token.Claims.(jwt.MapClaims)
-	for k, v := range claims {
+	for k, v := range input.Claims {
 		tclaims[k] = v
 	}
-	tclaims["exp"] = time.Now().Add(time.Minute * 5).Unix()
+	tclaims["exp"] = time.Now().Add(time.Minute * time.Duration(input.MinuteToExpire)).Unix()
 	// Generate encoded token and send it as response.
 	t, err := token.SignedString(signKey)
 	return t, err
